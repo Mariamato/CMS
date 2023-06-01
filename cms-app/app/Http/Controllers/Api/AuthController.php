@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -17,14 +17,14 @@ class AuthController extends Controller
     $validator = Validator::make(
         $request->all(),
         [
-           
+
             "FullName" => 'required |String | max:191',
             "Location" => 'required |String | max:191 |unique:users,Location',
             "PhoneNumber" => 'required | digits:10',
             "email" => 'required |email| max:191 |unique:users,email',
             "MunicipalityName" => 'required| max:191',
             "password" => 'required| min : 8',
-            
+
         ]
     );
 
@@ -35,7 +35,7 @@ class AuthController extends Controller
         ], 422);
     } else {
         $user = User::create([
-        
+
             "FullName" => $request->FullName,
             "Location" => $request->Location,
             "PhoneNumber" => $request->PhoneNumber,
@@ -69,7 +69,7 @@ class AuthController extends Controller
             'status' => 422,
             'error' => $validator->messages(),
         ], 422);
-    } 
+    }
     else {
         $user = User::where('email',$request->email)->first();
        if(!$user || ! Hash :: check($request->password,$user->password)){
@@ -91,24 +91,24 @@ class AuthController extends Controller
  }*/
     public function register(Request $request)
     {
-       
+
         $userType = $request->header('user_type');
 
         switch ($userType) {
             case 'Municipality':
-                $this->RegisterMunicipality($request);
+                return $this->RegisterMunicipality($request);
                 break;
 
             case 'ServiceProvider':
-                $this->registerServiceProvider($request);
+                return $this->registerServiceProvider($request);
                 break;
 
             case 'Resident':
-
-                $this->registerResident($request);
+                return $this->registerResident($request);
                 break;
 
-            default: return response()->json(['message' => 'Invalid user type'], 400);
+            default:
+                return response()->json(['message' => 'Invalid user type'], 400);
 
         }
 
@@ -189,6 +189,7 @@ class AuthController extends Controller
                 "Speciality" => $request->Speciality,
             ]);
             $token = $user->createToken($user->email . '_token')->plainTextToken;
+
             return response()->json([
                 'Status' => 200,
                 'FullName' => $user->FullName,
@@ -203,7 +204,6 @@ class AuthController extends Controller
 
     private function registerResident(Request $request)
     {
-
         $validator = Validator::make(
             $request->all(),
             [
@@ -240,7 +240,7 @@ class AuthController extends Controller
                 'MunicipalityName' => $request->MunicipalityName,
                 'Location' => $request->Location,
                 'token' => $token,
-                'Message' => 'Resident succesfully Registered',
+                'Message' => 'Resident successfully Registered',
             ], 200);
         }
     }

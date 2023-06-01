@@ -19,15 +19,15 @@ Route::post('/sanctum/token', function (Request $request) {
         'password' => 'required',
         'device_name' => 'required',
     ]);
- 
+
     $user = User::where('email', $request->email)->first();
- 
+
     if (! $user || ! Hash::check($request->password, $user->password)) {
         throw ValidationException::withMessages([
             'email' => ['The provided credentials are incorrect.'],
         ]);
     }
- 
+
     return $user->createToken($request->device_name)->plainTextToken;
 });
 
@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->get('/user/revoke', function (Request $reques
     return 'tokens are deleted';
 });
 
-Route::post('register',[AuthController::class, 'register']);
+Route::post('register',[\App\Http\Controllers\Api\AuthController::class, 'register']);
 Route::post('login',[AuthController::class, 'login']);
 
 Route::get('residents',[ResidentsController::class, 'index']);

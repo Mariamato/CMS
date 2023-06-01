@@ -38,7 +38,7 @@ class RegistrationPage extends StatelessWidget {
         'Applicatio/json'
         // Add any other required headers
       };
-      //dio.options.headers['user_type'] = 'Resident';
+      dio.options.headers['user_type'] = 'Resident';
 
       Response response = await dio.post('register', data: {
         'FullName': fullName,
@@ -51,7 +51,7 @@ class RegistrationPage extends StatelessWidget {
       });
 
       // Handle the response and any further actions (e.g., displaying success message)
-      print(response);
+      print(response.data);
     } catch (error) {
       // Handle any errors (e.g., displaying error message)
       print(error);
