@@ -104,7 +104,8 @@ class AuthController extends Controller
                 break;
 
             case 'Resident':
-                return $this->registerResident($request);
+                    return $this->registerResident($request);
+
                 break;
 
             default:
@@ -224,24 +225,23 @@ class AuthController extends Controller
                 'error' => $validator->messages(),
             ], 422);
         } else {
-            $user = User::create([
+        $user = User::create([
+            "FullName" => $request->FullName,
+            "Location" => $request->Location,
+            "PhoneNumber" => $request->PhoneNumber,
+            "email" => $request->email,
+            "MunicipalityName" => $request->MunicipalityName,
+            "password" => Hash::make($request->password),
+        ]);
+        $token = $user->createToken($user->email . '_token')->plainTextToken;
+        return response()->json([
+            'Status' => 200,
+            'FullName' => $user->FullName,
+            'MunicipalityName' => $request->MunicipalityName,
+            'Location' => $request->Location,
+            'token' => $token,
+            'Message' => 'Resident successfully Registered',
+        ], 200);
 
-                "FullName" => $request->FullName,
-                "Location" => $request->Location,
-                "PhoneNumber" => $request->PhoneNumber,
-                "email" => $request->email,
-                "MunicipalityName" => $request->MunicipalityName,
-                "password" => Hash::make($request->password),
-            ]);
-            $token = $user->createToken($user->email . '_token')->plainTextToken;
-            return response()->json([
-                'Status' => 200,
-                'FullName' => $user->FullName,
-                'MunicipalityName' => $request->MunicipalityName,
-                'Location' => $request->Location,
-                'token' => $token,
-                'Message' => 'Resident successfully Registered',
-            ], 200);
-        }
-    }
+    }}
 }
