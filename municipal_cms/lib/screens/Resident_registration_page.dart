@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:municipal_cms/screens/Resident_login_page.dart';
 import 'package:municipal_cms/service/auth.dart';
 import 'package:provider/provider.dart';
 import 'package:dio/dio.dart';
@@ -20,51 +21,76 @@ class RegistrationPage extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
 
   void _register(BuildContext context) async {
-    final Form = _formKey.currentState;
-    String password = _passwordController.text;
-    String confirmPassword = _ConfirmPasswordController.text;
-    String fullName = _fullNameController.text;
-    String email = _emailController.text;
-    String phoneNumber = _contactController.text;
-    String municipality = _municipalityNameController.text;
-    String location = _physicalAddressController.text;
-    var form;
-    // Send a POST request to your Laravel API for resident registration
+    final form = _formKey.currentState;
 
-    try {
-      Dio dio = Dio();
-      dio.options.baseUrl = 'http://127.0.0.1:8000/api/';
-      dio.options.headers['accept'] = {
-        'Applicatio/json'
-        // Add any other required headers
-      };
-      dio.options.headers['user_type'] = 'Resident';
+      String password = _passwordController.text;
+      String confirmPassword = _ConfirmPasswordController.text;
+      String fullName = _fullNameController.text;
+      String email = _emailController.text;
+      String phoneNumber = _contactController.text;
+      String municipality = _municipalityNameController.text;
+      String location = _physicalAddressController.text;
 
-      Response response = await dio.post('register', data: {
-        'FullName': fullName,
-        'email': email,
-        'password': password,
-        'Location': location,
-        'PhoneNumber': phoneNumber,
-        'MunicipalityName': municipality,
-        // 'ConfirmPassword':confirmPassword,
-      });
+      try {
+        Dio dio = Dio();
+        dio.options.baseUrl = 'http://127.0.0.1:8000/api/';
+        dio.options.headers['accept'] = 'application/json';
+        dio.options.headers['user_type'] = 'Resident';
 
-      // Handle the response and any further actions (e.g., displaying success message)
-      print(response.data);
+        Response response = await dio.post(
+          'register',
+          data: {
+            'FullName': fullName,
+            'email': email,
+            'password': password,
+            'Location': location,
+            'PhoneNumber': phoneNumber,
+            'MunicipalityName': municipality,
+          },
+        );
 
-      if (response.data.status === 200){
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ResidentLoginPage()),
+        // Handle the response
+        if (response.data.status == 200) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ResidentLoginPage()),
+          );
+        } else {
+          print(response);
+          // Display an error message to the user
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Registration Failed'),
+              content: Text('An error occurred during registration.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } catch (error) {
+        print(error);
+        // Display an error message to the user
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Registration Failed'),
+            content: Text('An error occurred during registration.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('OK'),
+              ),
+            ],
+          ),
         );
       }
-    } catch (error) {
-      // Handle any errors (e.g., displaying error message)
-      print(error);
-    }
-  }
 
+  }
   void _togglePasswordVisibility() {
     _showPassword = !_showPassword;
   }
