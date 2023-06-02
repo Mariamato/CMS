@@ -52,6 +52,13 @@ class RegistrationPage extends StatelessWidget {
 
       // Handle the response and any further actions (e.g., displaying success message)
       print(response.data);
+
+      if (response.data.status === 200){
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ResidentLoginPage()),
+        );
+      }
     } catch (error) {
       // Handle any errors (e.g., displaying error message)
       print(error);
