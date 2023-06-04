@@ -17,7 +17,7 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $csrfToken = csrf_token()::getToken();
+       // $csrfToken = csrf_token()::getToken();
         $userType = $request->header('user_type');
 
         switch ($userType) {
