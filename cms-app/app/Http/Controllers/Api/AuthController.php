@@ -11,87 +11,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+
 class AuthController extends Controller
 {
-    /*public function register(Request $request){
-    $validator = Validator::make(
-        $request->all(),
-        [
 
-            "FullName" => 'required |String | max:191',
-            "Location" => 'required |String | max:191 |unique:users,Location',
-            "PhoneNumber" => 'required | digits:10',
-            "email" => 'required |email| max:191 |unique:users,email',
-            "MunicipalityName" => 'required| max:191',
-            "password" => 'required| min : 8',
-
-        ]
-    );
-
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => 422,
-            'error' => $validator->messages(),
-        ], 422);
-    } else {
-        $user = User::create([
-
-            "FullName" => $request->FullName,
-            "Location" => $request->Location,
-            "PhoneNumber" => $request->PhoneNumber,
-            "email" => $request->email,
-            "MunicipalityName" => $request->MunicipalityName,
-            "password" => Hash :: make($request -> password),
-        ]);
-        $token = $user -> createToken($user->email.'_token')->plainTextToken;
-        return response()->json([
-            'Status' => 200,
-            'FullName' => $user->FullName,
-            'MunicipalityName' => $request->MunicipalityName,
-            'Location' => $request->Location,
-            'token'=>$token,
-            'Message' => 'User succesfull Registered',
-        ], 200);
-    }
- }
-
- public function login(Request $request){
-    $validator = Validator::make(
-        $request->all(),
-        [
-            "email" => 'required |email| max:191',
-            "Password" => 'required ',
-        ]
-    );
-
-    if ($validator->fails()) {
-        return response()->json([
-            'status' => 422,
-            'error' => $validator->messages(),
-        ], 422);
-    }
-    else {
-        $user = User::where('email',$request->email)->first();
-       if(!$user || ! Hash :: check($request->password,$user->password)){
-       response()->json([
-            'status' => 401,
-            'message' => 'invalid Credentials',
-        ], 401);
-       }
-       else{
-        $token = $user -> createToken($user->email.'_token')->plainTextToken;
-        return response()->json([
-            'Status' => 200,
-            'FullName' => $user->FullName,
-            'Message' => 'Logged in succesfully',
-        ], 200);
-       }
-    }
-
- }*/
     public function register(Request $request)
     {
-
+        $csrfToken = csrf_token()::getToken();
         $userType = $request->header('user_type');
 
         switch ($userType) {
@@ -123,7 +49,7 @@ class AuthController extends Controller
             [
                 "FullName" => 'String | max:191',
                 "MunicipalityName" => 'required| max:191',
-                "Location" => 'required |String | max:191 |unique:users,Location',
+                "Location" => 'required |String | max:191',
                 "PhoneNumber" => 'required | digits:10',
                 "email" => 'required |email| max:191 |unique:users,email',
                 "password" => 'required| min : 8',
@@ -163,7 +89,7 @@ class AuthController extends Controller
             [
 
                 "FullName" => 'required |String | max:191',
-                "Location" => 'required |String | max:191 |unique:users,Location',
+                "Location" => 'required |String | max:191 ',
                 "PhoneNumber" => 'required | digits:10',
                 "email" => 'required |email| max:191 |unique:users,email',
                 "MunicipalityName" => 'required| max:191',
@@ -210,7 +136,7 @@ class AuthController extends Controller
             [
 
                 "FullName" => 'required |String | max:191',
-                "Location" => 'required |String | max:191 |unique:users,Location',
+                "Location" => 'required |String | max:191',
                 "PhoneNumber" => 'required | digits:10',
                 "email" => 'required |email| max:191 |unique:users,email',
                 "MunicipalityName" => 'required| max:191',

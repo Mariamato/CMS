@@ -1,10 +1,11 @@
 import 'dart:ui';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:municipal_cms/screens/Resident_login_page.dart';
 import 'package:municipal_cms/service/auth.dart';
 import 'package:provider/provider.dart';
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
+
 
 class RegistrationPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
@@ -23,15 +24,15 @@ class RegistrationPage extends StatelessWidget {
   void _register(BuildContext context) async {
     final form = _formKey.currentState;
 
-      String password = _passwordController.text;
-      String confirmPassword = _ConfirmPasswordController.text;
-      String fullName = _fullNameController.text;
-      String email = _emailController.text;
-      String phoneNumber = _contactController.text;
-      String municipality = _municipalityNameController.text;
-      String location = _physicalAddressController.text;
+    String password = _passwordController.text;
+    String confirmPassword = _ConfirmPasswordController.text;
+    String fullName = _fullNameController.text;
+    String email = _emailController.text;
+    String phoneNumber = _contactController.text;
+    String municipality = _municipalityNameController.text;
+    String location = _physicalAddressController.text;
 
-      try {
+    /*try {
         Dio dio = Dio();
         dio.options.baseUrl = 'http://127.0.0.1:8000/api/';
         dio.options.headers['accept'] = 'application/json';
@@ -50,6 +51,7 @@ class RegistrationPage extends StatelessWidget {
         );
 
         // Handle the response
+
         if (response.data.status == 200) {
           Navigator.push(
             context,
@@ -88,9 +90,54 @@ class RegistrationPage extends StatelessWidget {
             ],
           ),
         );
-      }
+      }*/
+     var csrfResponse = await http.get(Uri.parse('/sanctum/csrf-cookie'));
+     var csrfToken = csrfResponse.headers['set-cookie']??'';
 
+    var url = Uri.parse('http://127.0.0.1:8000/api/register');
+    var headers = <String, String>{
+    'Content-Type': 'application/json',
+    'X-XSRF-TOKEN': csrfToken,
+  };
+    var data = {
+      'FullName': fullName,
+      'email': email,
+      'password': password,
+      'Location': location,
+      'PhoneNumber': phoneNumber,
+      'MunicipalityName': municipality,
+    };
+    var response = await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(data),
+    );
+
+     if (response.statusCode == 200) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ResidentLoginPage()),
+          );
+        } else {
+          print(response);
+          // Display an error message to the user
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Registration Failed'),
+              content: Text('An error occurred during registration.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      
   }
+
   void _togglePasswordVisibility() {
     _showPassword = !_showPassword;
   }
@@ -235,7 +282,7 @@ class RegistrationPage extends StatelessWidget {
                                   child: ElevatedButton(
                                     child: const Text('Register'),
                                     onPressed: () {
-                                      Map creds = {
+                                     /* Map creds = {
                                         'email': _emailController.text,
                                         'password': _passwordController.text,
                                         'PhoneNumber': _contactController.text,
@@ -254,7 +301,7 @@ class RegistrationPage extends StatelessWidget {
                                               .register(creds: creds);
                                           _register(context);
                                         }
-                                      }
+                                      }*/
                                     },
                                   ),
                                 )

@@ -39,6 +39,7 @@ dependencies:
   flutterwave: ^1.0.3
   provider: ^6.0.5
   dio: ^5.1.2
+  http: ^0.13.6
 
 dev_dependencies:
   flutter_test:
