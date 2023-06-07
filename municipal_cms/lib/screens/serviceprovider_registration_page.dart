@@ -20,7 +20,7 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
   final TextEditingController _physicalAddressController =
       TextEditingController();
   final TextEditingController _fullNameController = TextEditingController();
-  bool _showPassword = false;
+  bool hidePassword = true;
   final _formKey = GlobalKey<FormState>();
 
   ServiceProviderRegistrationPage({super.key});
@@ -58,43 +58,8 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
       body: jsonEncode(data),
     );
 
-    bool isEmailValid = RegExp(r'^[a-zA-Z0-9]+@[a-zA-Z0-9.]+$').hasMatch(email);
 
-    bool isPasswordValid = RegExp(
-            r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$')
-        .hasMatch(password);
-    if (!isEmailValid) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Invalid Email'),
-          content: const Text('Please enter a valid email address.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-     
-    }else if (!isPasswordValid) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Invalid Password'),
-          content: const Text(
-              'Please enter a password with at least 8 characters, including one uppercase letter, one lowercase letter, one digit, and one special character.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    
-    }else if (response.statusCode == 200) {
+    if (response.statusCode == 200) {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -111,7 +76,8 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (context) => ServiceProviderLoginPage()),
       );
-    } else {
+    }
+     else {
       print(response.body);
       // Display an error message to the user
       showDialog(
@@ -128,10 +94,6 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
         ),
       );
     }
-  }
-
-  void _togglePasswordVisibility() {
-    _showPassword = !_showPassword;
   }
 
   @override
@@ -184,12 +146,9 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
                                     icon: Icon(Icons.email),
                                   ),
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please enter your email';
-                                    }
-                                    return null;
-                                  },
+                                  validator: (input) => input!.contains("@")
+                                  ? 'Email Id should valid'
+                                  : 'please enter your valid email',
                                 ),
                                 const SizedBox(height: 16.0),
                                 TextFormField(
@@ -199,20 +158,21 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
                                     icon: const Icon(Icons.lock),
                                     suffixIcon: IconButton(
                                       icon: Icon(
-                                        _showPassword
-                                            ? Icons.visibility
-                                            : Icons.visibility_off,
+                                        hidePassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility,
                                       ),
-                                      onPressed: _togglePasswordVisibility,
+                                      onPressed: () {
+                                        setState(() {
+                                          hidePassword = !hidePassword;
+                                        });
+                                      },
                                     ),
                                   ),
-                                  obscureText: !_showPassword,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please enter your password';
-                                    }
-                                    return null;
-                                  },
+                                  obscureText: hidePassword,
+                                  validator: (input) => input!.length < 8
+                                    ? 'Password should atleast be with 8 characters'
+                                    : 'prease enter your valid password',
                                 ),
                                 TextFormField(
                                   controller: _ConfirmPasswordController,
@@ -220,13 +180,10 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
                                     labelText: 'Confirm password',
                                     icon: Icon(Icons.lock),
                                   ),
-                                  obscureText: !_showPassword,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Password entered does not match';
-                                    }
-                                    return null;
-                                  },
+                                  obscureText: hidePassword,
+                                  validator: (input) => input!.length < 8
+                                    ? 'Password should atleast be with 8 characters'
+                                    : 'prease enter your valid password',
                                 ),
                                 TextFormField(
                                   controller: _municipalityNameController,
@@ -321,4 +278,6 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
           ),
         ));
   }
+  
+  void setState(Null Function() param0) {}
 }

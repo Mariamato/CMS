@@ -19,7 +19,7 @@ class RegistrationPage extends StatelessWidget {
   final TextEditingController _physicalAddressController =
       TextEditingController();
   final TextEditingController _fullNameController = TextEditingController();
-  bool _showPassword = false;
+   bool hidePassword = true;
   final _formKey = GlobalKey<FormState>();
 
   RegistrationPage({super.key});
@@ -38,6 +38,7 @@ class RegistrationPage extends StatelessWidget {
     var url = Uri.parse('http://127.0.0.1:8000/api/register');
     var headers = <String, String>{
       'Content-Type': 'application/json',
+      'accept': 'application/json',
       'X-XSRF-TOKEN': csrfToken,
       'user_type': 'Resident'
     };
@@ -54,24 +55,7 @@ class RegistrationPage extends StatelessWidget {
       headers: headers,
       body: jsonEncode(data),
     );
-    bool isEmailValid = RegExp(r'^[a-zA-Z0-9]+@[a-zA-Z0-9.]+$').hasMatch(email);
-        
-    if (!isEmailValid) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Invalid Email'),
-          content: const Text('Please enter a valid email address.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-  
-    }else if (response.statusCode == 200) {
+     if (response.statusCode == 200) {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -95,7 +79,7 @@ class RegistrationPage extends StatelessWidget {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Registration Failed'),
-          content: const Text('An error occurred during registration.'),
+          content: const Text('Try again'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -105,10 +89,7 @@ class RegistrationPage extends StatelessWidget {
         ),
       );
     }
-  }
-
-  void _togglePasswordVisibility() {
-    _showPassword = !_showPassword;
+     
   }
 
   @override
@@ -161,35 +142,33 @@ class RegistrationPage extends StatelessWidget {
                                     icon: Icon(Icons.email),
                                   ),
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please enter your email';
-                                    }
-                                    return null;
-                                  },
+                                   validator: (input) => input!.contains("@")
+                                  ? 'Email Id should valid'
+                                  : 'please enter your valid email',
                                 ),
                                 const SizedBox(height: 16.0),
                                 TextFormField(
                                   controller: _passwordController,
+                                   validator: (input) => input!.length < 8
+                                    ? 'Password should atleast be with 8 characters'
+                                    : 'prease enter your valid password',
                                   decoration: InputDecoration(
                                     labelText: 'Password',
                                     icon: const Icon(Icons.lock),
                                     suffixIcon: IconButton(
                                       icon: Icon(
-                                        _showPassword
-                                            ? Icons.visibility
-                                            : Icons.visibility_off,
+                                        hidePassword
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility,
                                       ),
-                                      onPressed: _togglePasswordVisibility,
+                                       onPressed: () {
+                                        setState(() {
+                                          hidePassword = !hidePassword;
+                                        });
+                                      },
                                     ),
                                   ),
-                                  obscureText: !_showPassword,
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please enter your password';
-                                    }
-                                    return null;
-                                  },
+                                  obscureText: !hidePassword,
                                 ),
                                 TextFormField(
                                   controller: _ConfirmPasswordController,
@@ -197,7 +176,7 @@ class RegistrationPage extends StatelessWidget {
                                     labelText: 'Confirm password',
                                     icon: Icon(Icons.lock),
                                   ),
-                                  obscureText: !_showPassword,
+                                  obscureText: hidePassword,
                                   validator: (value) {
                                     if (value!.isEmpty) {
                                       return 'Password entered does not match';
@@ -286,4 +265,6 @@ class RegistrationPage extends StatelessWidget {
           ),
         ));
   }
+  
+  void setState(Null Function() param0) {}
 }

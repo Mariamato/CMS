@@ -129,7 +129,7 @@ class AuthController extends Controller
         }
     }
 
-    private function registerResident(Request $request)
+    public function registerResident(Request $request)
     {
         $validator = Validator::make(
             $request->all(),
@@ -190,8 +190,9 @@ class AuthController extends Controller
         }
     }
 
-    private function UsersLogin(Request $request)
+    public function UsersLogin(Request $request)
     {
+        $user = $request->only('email','password');
         $validator = Validator::make(
             $request->all(),
             [
@@ -200,30 +201,25 @@ class AuthController extends Controller
 
             ]
         );
-        
-
         if ($validator->fails()) {
             return response()->json([
                 'Validation error' => $validator->messages(),
-            ],);
-        } else {
-            $user = User::where('email', $request->email)->first();
+            ], 400);
+        } $user = User::where('email', $request->email)->first();
 
-            if (!$user || !Hash::check($request->password, $user->password)) {
-                $token = $user->createToken($user->email . '_token')->plainTextToken;
-                $response = ['user'=>$user,'token'=>$token];
-                return response()->json([
-                    'status' => 401,
-                    'Message' => 'Invalid credentials',
-                ],401);
-            } else {
-                $token = $user->createToken($user->email . '_token')->plainTextToken;
-                return response()->json([
-                    'Status' => 200,
-                    'token' => $token,
-                    'Message' => 'Loggedin successfully ',
-                ], 200);
-            }
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            $token = $user->createToken($user->email . '_token')->plainTextToken;
+            $response = ['user'=>$user,'token'=>$token];
+            return response()->json([
+                'status' => 401,
+                'Message' => 'Invalid credentials',
+            ],401);
         }
+      $token = $user->createToken($user->email . '_token')->plainTextToken;
+        return response()->json([
+            'Status' => 200,
+            'token' => $token,
+            'Message' => 'Loggedin successfully ',
+        ], 200);
     }
 }

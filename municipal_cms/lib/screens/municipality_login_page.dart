@@ -12,14 +12,10 @@ class MunicipalityLoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _showPassword = false;
+ bool hidePassword = true;
 
 
   MunicipalityLoginPage({super.key});
-
-  void _togglePasswordVisibility() {
-    _showPassword = !_showPassword;
-  }
 
   void _login(BuildContext context) async {
     String password = _passwordController.text;
@@ -42,44 +38,13 @@ class MunicipalityLoginPage extends StatelessWidget {
       headers: headers,
       body: jsonEncode(data),
     );
-    bool isEmailValid = RegExp(r'^[a-zA-Z0-9]+@[a-zA-Z0-9.]+$').hasMatch(email);
-
-    bool isPasswordValid = RegExp( r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$').hasMatch(password);
-    if (!isEmailValid) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Invalid Email'),
-          content: const Text('Please enter a valid email address.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }else if (!isPasswordValid) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Invalid Password'),
-          content: const Text(
-              'Please enter a password with at least 8 characters, including one uppercase letter, one lowercase letter, one digit, and one special character.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }else if (response.statusCode == 200) {
+    if (response.statusCode == 200) {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) =>  MunicipalityPage()),
       );
-    } else if (response.statusCode == 401) {
+    } 
+    if (response.statusCode == 401) {
       print(response.body);
       showDialog(
         context: context,
@@ -94,7 +59,8 @@ class MunicipalityLoginPage extends StatelessWidget {
           ],
         ),
       );
-    } else {
+    } 
+    else {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -159,12 +125,9 @@ class MunicipalityLoginPage extends StatelessWidget {
                                 icon: Icon(Icons.email),
                               ),
                               keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Please enter your email';
-                                }
-                                return null;
-                              },
+                             validator: (input) => input!.contains("@")
+                                  ? 'Email Id should valid'
+                                  : 'enter your valid email',
                             ),
                             const SizedBox(height: 16.0),
                             TextFormField(
@@ -174,20 +137,21 @@ class MunicipalityLoginPage extends StatelessWidget {
                                 icon: const Icon(Icons.lock),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _showPassword
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                                    hidePassword
+                                        ? Icons.visibility_off_outlined
+                                        : Icons.visibility,
                                   ),
-                                  onPressed: _togglePasswordVisibility,
+                                  onPressed: () {
+                                        setState(() {
+                                          hidePassword = !hidePassword;
+                                        });
+                                      },
                                 ),
                               ),
-                              obscureText: !_showPassword,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Please enter your password';
-                                }
-                                return null;
-                              },
+                              obscureText: hidePassword,
+                               validator: (input) => input!.length < 8
+                                    ? 'Password should atleast be with 8 characters'
+                                    : 'enter valid password',
                             ),
                             const SizedBox(height: 16.0),
                             const SizedBox(height: 16.0),
