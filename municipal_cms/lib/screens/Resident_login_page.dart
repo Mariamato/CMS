@@ -1,46 +1,116 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:ui';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:municipal_cms/service/auth.dart';
-import 'package:provider/provider.dart';
-import 'resident_page.dart';
+import 'package:municipal_cms/screens/resident_page.dart';
 import 'Resident_registration_page.dart';
+import 'package:http/http.dart' as http;
 
+// ignore: must_be_immutable
 class ResidentLoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _showPassword = false;
-  bool _rememberMe = false;
 
-  void _toggleRememberMe() {
-    setState(() {
-      _rememberMe = !_rememberMe;
-    });
-  }
-
-  void setState(Null Function() param0) {}
-
-  // void _loginWithGoogle(BuildContext context) {}
+  ResidentLoginPage({super.key});
 
   void _togglePasswordVisibility() {
     _showPassword = !_showPassword;
   }
 
-  void _login(BuildContext context) {
-    // Add login functionality here
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ResidentPage()),
+  void _login(BuildContext context) async {
+    String password = _passwordController.text;
+    String email = _emailController.text;
+    var csrfResponse = await http.get(Uri.parse('/sanctum/csrf-cookie'));
+    var csrfToken = csrfResponse.headers['set-cookie'] ?? '';
+
+    var url = Uri.parse('http://127.0.0.1:8000/api/login');
+    var headers = <String, String>{
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': csrfToken,
+      'user_type': 'Resident'
+    };
+    var data = {
+      'email': email,
+      'password': password,
+    };
+    var response = await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(data),
     );
+    bool isEmailValid = RegExp(r'^[a-zA-Z0-9]+@[a-zA-Z0-9.]+$').hasMatch(email);
+
+    bool isPasswordValid = RegExp( r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$').hasMatch(password);
+    if (!isEmailValid) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Invalid Email'),
+          content: const Text('Please enter a valid email address.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }else if (!isPasswordValid) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Invalid Password'),
+          content: const Text(
+              'Please enter a password with at least 8 characters, including one uppercase letter, one lowercase letter, one digit, and one special character.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }else if (response.statusCode == 200) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ResidentPage()),
+      );
+    } else if (response.statusCode == 401) {
+      print(response.body);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Login Failed'),
+          content: const Text('Credentials incorrect'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Login Failed'),
+          content: const Text('An error occurred while logging in'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
-  void _forgotPassword(BuildContext context) {
-    // Add forgot password functionality here
-  }
   void _register(BuildContext context) {
-    // Add registration functionality here
-
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegistrationPage()),
@@ -51,7 +121,7 @@ class ResidentLoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ResidentLogin'),
+        title: const Text('Resident Login'),
       ),
       body: Container(
         height: 10000.0,
@@ -117,26 +187,9 @@ class ResidentLoginPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 16.0),
                             const SizedBox(height: 16.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                        value: _rememberMe,
-                                        onChanged: (bool? value) {
-                                          setState(() {
-                                            _rememberMe = value!;
-                                          });
-                                        }),
-                                    const Text('Remember me'),
-                                  ],
-                                ),
-                                TextButton(
-                                  child: const Text('Register Now'),
-                                  onPressed: () => _register(context),
-                                ),
-                              ],
+                            TextButton(
+                              child: const Text('Register Now'),
+                              onPressed: () => _register(context),
                             ),
                             Container(
                               width: double.infinity,
@@ -144,56 +197,9 @@ class ResidentLoginPage extends StatelessWidget {
                               alignment: Alignment.topCenter,
                               child: ElevatedButton(
                                 child: const Text('Login'),
-                                onPressed: () {
-                                  Map creds = {
-                                    'email': _emailController.text,
-                                    'password': _passwordController.text,
-                                    'device name': 'mobile',
-                                  };
-
-                                  if (_formKey.currentState != null &&
-                                      _formKey.currentState!.validate()) {
-                                    Provider.of<Auth>(context, listen: false)
-                                        .login(creds: creds);
-                                    _login(context);
-                                  }
-                                },
+                                onPressed: () => _login(context),
                               ),
                             ),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(4),
-                              alignment: Alignment.topCenter,
-                              child: TextButton(
-                                child: const Text('Forgot password?'),
-                                onPressed: () => _forgotPassword(context),
-                              ),
-                            ),
-
-                            /* const SizedBox(height: 16.0),
-                           const Text(
-                              'Or login with',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 16.0, color: Colors.grey),
-                            ),
-                           const SizedBox(height: 16.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                IconButton(
-                                  icon:const Icon(Icons.facebook_outlined),
-                                  onPressed: () => _loginWithFacebook(context),
-                                ),
-                                IconButton(
-                                  icon: Icon(icons.google),
-                                  onPressed: () => _loginWithGoogle(context),
-                                ),
-                                IconButton(
-                                  icon: Icon(icons.twitter),
-                                  onPressed: () => _loginWithTwitter(context),
-                                ),
-                              ],
-                            ),*/
                           ],
                         ),
                       ),
@@ -207,4 +213,6 @@ class ResidentLoginPage extends StatelessWidget {
       ),
     );
   }
+
+  void setState(Null Function() param0) {}
 }

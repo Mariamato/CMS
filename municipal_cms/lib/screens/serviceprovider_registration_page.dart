@@ -1,76 +1,132 @@
-import 'dart:ui';
+// ignore_for_file: use_build_context_synchronously, must_be_immutable
 
+import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-import 'package:provider/provider.dart';
+import 'package:municipal_cms/screens/Service_provider_login_pag.dart';
 import 'package:municipal_cms/service/auth.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class ServiceProviderRegistrationPage extends StatelessWidget {
+  final TextEditingController _specialityController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _municipalityNameController =
+      TextEditingController();
+  final TextEditingController _ConfirmPasswordController =
+      TextEditingController();
   final TextEditingController _contactController = TextEditingController();
   final TextEditingController _physicalAddressController =
       TextEditingController();
   final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _specialityController = TextEditingController();
-  final TextEditingController _ConfirmPasswordController =
-      TextEditingController();
-  final TextEditingController _municipalityNameController =
-      TextEditingController();
-
   bool _showPassword = false;
   final _formKey = GlobalKey<FormState>();
 
   ServiceProviderRegistrationPage({super.key});
 
   void _register(BuildContext context) async {
-    final Form = _formKey.currentState;
     String password = _passwordController.text;
-    String confirmPassword = _ConfirmPasswordController.text;
+    //String confirmPassword = _ConfirmPasswordController.text;
     String fullName = _fullNameController.text;
     String email = _emailController.text;
     String phoneNumber = _contactController.text;
     String municipality = _municipalityNameController.text;
     String location = _physicalAddressController.text;
     String speciality = _specialityController.text;
-    var form;
+    var csrfResponse = await http.get(Uri.parse('/sanctum/csrf-cookie'));
+    var csrfToken = csrfResponse.headers['set-cookie'] ?? '';
 
-    // Send a POST request to your Laravel API for resident registration
+    var url = Uri.parse('http://127.0.0.1:8000/api/register');
+    var headers = <String, String>{
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': csrfToken,
+      'user_type': 'ServiceProvider'
+    };
+    var data = {
+      'FullName': fullName,
+      'email': email,
+      'password': password,
+      'Location': location,
+      'PhoneNumber': phoneNumber,
+      'MunicipalityName': municipality,
+      'Speciality': speciality,
+    };
+    var response = await http.post(
+      url,
+      headers: headers,
+      body: jsonEncode(data),
+    );
 
-    try {
-      Dio dio = Dio();
-      dio.options.baseUrl = 'http://127.0.0.1:8000/api/';
-      dio.options.headers['accept'] = {
-        'Applicatio/json'
-        // Add any other required headers
-      };
-      Response response = await dio.post('register', data: {
-        'FullName': fullName,
-        'email': email,
-        'password': password,
-        'Location': location,
-        'PhoneNumber': phoneNumber,
-        'MunicipalityName': municipality,
-        'Speciality': speciality,
-      });
+    bool isEmailValid = RegExp(r'^[a-zA-Z0-9]+@[a-zA-Z0-9.]+$').hasMatch(email);
 
-      // Handle the response and any further actions (e.g., displaying success message)
-      print(response.data);
-    } catch (error) {
-      // Handle any errors (e.g., displaying error message)
-      print(error);
-    }
-    if (form.validate()) {
-      form.save;
-      if (password != confirmPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Passwords do not match.'),
-        ));
-      } else {
-        Navigator.pushNamed(context, '/home');
-      }
+    bool isPasswordValid = RegExp(
+            r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$')
+        .hasMatch(password);
+    if (!isEmailValid) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Invalid Email'),
+          content: const Text('Please enter a valid email address.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+     
+    }else if (!isPasswordValid) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Invalid Password'),
+          content: const Text(
+              'Please enter a password with at least 8 characters, including one uppercase letter, one lowercase letter, one digit, and one special character.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    
+    }else if (response.statusCode == 200) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text('Registration'),
+                content: const Text('Service Provider registered successfully'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ServiceProviderLoginPage()),
+      );
     } else {
-      Navigator.pushNamed(context, '/home');
+      print(response.body);
+      // Display an error message to the user
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Registration Failed'),
+          content: const Text('An error occurred during registration.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -82,7 +138,7 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Jisajili hapa'),
+          title: const Text('Jisajili '),
         ),
         body: Container(
           height: 10000.0,
@@ -103,156 +159,159 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: SingleChildScrollView(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              TextFormField(
-                                controller: _fullNameController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Full Name',
-                                  icon: Icon(Icons.person),
-                                ),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter your Name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
-                                controller: _emailController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Email',
-                                  icon: Icon(Icons.email),
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 16.0),
-                              TextFormField(
-                                controller: _passwordController,
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  icon: const Icon(Icons.lock),
-                                  suffixIcon: IconButton(
-                                    icon: Icon(
-                                      _showPassword
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                    ),
-                                    onPressed: _togglePasswordVisibility,
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TextFormField(
+                                  controller: _fullNameController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Full Name',
+                                    icon: Icon(Icons.person),
                                   ),
-                                ),
-                                obscureText: !_showPassword,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter your password';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
-                                controller: _passwordController,
-                                decoration: const InputDecoration(
-                                  labelText: 'Confirm password',
-                                  icon: Icon(Icons.lock),
-                                ),
-                                obscureText: !_showPassword,
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Password entered does not match';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
-                                controller: _municipalityNameController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Municipality Name',
-                                    icon: Icon(Icons.location_city)),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter your Municipality Name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
-                                controller: _physicalAddressController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Location',
-                                    icon: Icon(Icons.mail)),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter your Loction';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
-                                controller: _specialityController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Speciality',
-                                    icon: Icon(Icons.task)),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter your Speciality';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              TextFormField(
-                                controller: _contactController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Phone Number',
-                                    icon: Icon(Icons.phone_rounded)),
-                                validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter your Name';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(
-                                height: 20.0,
-                              ),
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(15.0),
-                                alignment: Alignment.topCenter,
-                                child: ElevatedButton(
-                                  child: const Text('Register'),
-                                  onPressed: () {
-                                    Map creds = {
-                                      'email': _emailController.text,
-                                      'password': _passwordController.text,
-                                      'PhoneNumber': _contactController.text,
-                                      'Location':
-                                          _physicalAddressController.text,
-                                      'CornfirmPassword':
-                                          _ConfirmPasswordController.text,
-                                      'speciality': _specialityController,
-                                      'MunicipalityName':
-                                          _municipalityNameController.text,
-                                      'DeviceName': 'mobile',
-                                    };
-                                    if (_formKey.currentState != null) {
-                                      if (_formKey.currentState!.validate()) {
-                                        Provider.of<Auth>(context,
-                                                listen: false)
-                                            .register(creds: creds);
-                                        _register(context);
-                                      }
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Please enter your Name';
                                     }
+                                    return null;
                                   },
                                 ),
-                              )
-                            ]),
+                                TextFormField(
+                                  controller: _emailController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Email',
+                                    icon: Icon(Icons.email),
+                                  ),
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Please enter your email';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16.0),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Password',
+                                    icon: const Icon(Icons.lock),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _showPassword
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                      ),
+                                      onPressed: _togglePasswordVisibility,
+                                    ),
+                                  ),
+                                  obscureText: !_showPassword,
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Please enter your password';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                TextFormField(
+                                  controller: _ConfirmPasswordController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Confirm password',
+                                    icon: Icon(Icons.lock),
+                                  ),
+                                  obscureText: !_showPassword,
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Password entered does not match';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                TextFormField(
+                                  controller: _municipalityNameController,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Municipality Name',
+                                      icon: Icon(Icons.location_city)),
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Please enter your Municipality Name';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                TextFormField(
+                                  controller: _contactController,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Phone Number',
+                                      icon: Icon(Icons.phone_rounded)),
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Please enter your Phone number';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                TextFormField(
+                                  controller: _physicalAddressController,
+                                  decoration: const InputDecoration(
+                                      labelText: 'location',
+                                      icon: Icon(Icons.mail)),
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Please enter your Location';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                TextFormField(
+                                  controller: _specialityController,
+                                  decoration: const InputDecoration(
+                                      labelText: 'Speciality',
+                                      icon: Icon(Icons.location_city)),
+                                  validator: (value) {
+                                    if (value!.isEmpty) {
+                                      return 'Please enter your Speciality';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(
+                                  height: 20.0,
+                                ),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(15.0),
+                                  alignment: Alignment.topCenter,
+                                  child: ElevatedButton(
+                                    child: const Text('Register'),
+                                    onPressed: () {
+                                      Map creds = {
+                                        'email': _emailController.text,
+                                        'password': _passwordController.text,
+                                        'PhoneNumber': _contactController.text,
+                                        'Location':
+                                            _physicalAddressController.text,
+                                        'MunicipalityName':
+                                            _municipalityNameController.text,
+                                        'CornfirmPassword':
+                                            _ConfirmPasswordController.text,
+                                        'DeviceName': 'mobile',
+                                      };
+
+                                      if (_formKey.currentState != null) {
+                                        if (_formKey.currentState!.validate()) {
+                                          Provider.of<Auth>(context,
+                                                  listen: false)
+                                              .register(creds: creds);
+                                          _register(context);
+                                        }
+                                      }
+                                    },
+                                  ),
+                                )
+                              ]),
+                        ),
                       ),
                     ),
                   ),

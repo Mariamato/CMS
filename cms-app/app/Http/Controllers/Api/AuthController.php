@@ -17,26 +17,25 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-       // $csrfToken = csrf_token()::getToken();
+        // $csrfToken = csrf_token()::getToken();
         $userType = $request->header('user_type');
 
         switch ($userType) {
             case 'Municipality':
                 return $this->RegisterMunicipality($request);
-                break;
+            
 
             case 'ServiceProvider':
                 return $this->registerServiceProvider($request);
-                break;
+                
 
             case 'Resident':
-                    return $this->registerResident($request);
+                return $this->registerResident($request);
 
-                break;
+                
 
             default:
                 return response()->json(['message' => 'Invalid user type'], 400);
-
         }
 
         //return response()->json(['message' => 'Registration successful']);
@@ -70,8 +69,9 @@ class AuthController extends Controller
                 "PhoneNumber" => $request->PhoneNumber,
                 "email" => $request->email,
                 "password" => Hash::make($request->password),
-            ]);
+            ]); 
             $token = $user->createToken($user->email . '_token')->plainTextToken;
+            $response = ['user'=>$user,'token'=>$token];
             return response()->json([
                 'Status' => 200,
                 'MunicipalityName' => $request->MunicipalityName,
@@ -116,7 +116,7 @@ class AuthController extends Controller
                 "Speciality" => $request->Speciality,
             ]);
             $token = $user->createToken($user->email . '_token')->plainTextToken;
-
+            $responce = ['user'=>$user,'token'=>$token];
             return response()->json([
                 'Status' => 200,
                 'FullName' => $user->FullName,
@@ -151,23 +151,79 @@ class AuthController extends Controller
                 'error' => $validator->messages(),
             ], 422);
         } else {
-        $user = User::create([
-            "FullName" => $request->FullName,
-            "Location" => $request->Location,
-            "PhoneNumber" => $request->PhoneNumber,
-            "email" => $request->email,
-            "MunicipalityName" => $request->MunicipalityName,
-            "password" => Hash::make($request->password),
-        ]);
-        $token = $user->createToken($user->email . '_token')->plainTextToken;
-        return response()->json([
-            'Status' => 200,
-            'FullName' => $user->FullName,
-            'MunicipalityName' => $request->MunicipalityName,
-            'Location' => $request->Location,
-            'token' => $token,
-            'Message' => 'Resident successfully Registered',
-        ], 200);
+            $user = User::create([
+                "FullName" => $request->FullName,
+                "Location" => $request->Location,
+                "PhoneNumber" => $request->PhoneNumber,
+                "email" => $request->email,
+                "MunicipalityName" => $request->MunicipalityName,
+                "password" => Hash::make($request->password),
+            ]);
+            $token = $user->createToken($user->email . '_token')->plainTextToken;
+            $response = ['user'=>$user,'token'=>$token];
+            return response()->json([
+                'Status' => 200,
+                'FullName' => $user->FullName,
+                'MunicipalityName' => $request->MunicipalityName,
+                'Location' => $request->Location,
+                'token' => $token,
+                'Message' => 'Resident successfully Registered',
+            ], 200);
+        }
+    }
 
-    }}
+    public function login(Request $request)
+    {
+        $userType = $request->header('user_type');
+        switch ($userType) {
+            case 'Municipality':
+                return $this->UsersLogin($request);
+
+            case 'ServiceProvider':
+                return $this->UsersLogin($request);
+
+            case 'Resident':
+                return $this->UsersLogin($request);
+
+            default:
+                return response()->json(['message' => 'Invalid user type'], 400);
+        }
+    }
+
+    private function UsersLogin(Request $request)
+    {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                "email" => 'required |email| max:191 ',
+                "password" => 'required| min : 8',
+
+            ]
+        );
+        
+
+        if ($validator->fails()) {
+            return response()->json([
+                'Validation error' => $validator->messages(),
+            ],);
+        } else {
+            $user = User::where('email', $request->email)->first();
+
+            if (!$user || !Hash::check($request->password, $user->password)) {
+                $token = $user->createToken($user->email . '_token')->plainTextToken;
+                $response = ['user'=>$user,'token'=>$token];
+                return response()->json([
+                    'status' => 401,
+                    'Message' => 'Invalid credentials',
+                ],401);
+            } else {
+                $token = $user->createToken($user->email . '_token')->plainTextToken;
+                return response()->json([
+                    'Status' => 200,
+                    'token' => $token,
+                    'Message' => 'Loggedin successfully ',
+                ], 200);
+            }
+        }
+    }
 }

@@ -12,6 +12,7 @@ class Auth extends ChangeNotifier {
   User get user => _user;
 
   void login({required Map creds}) async {
+     void login({required Map creds}) async {
     try {
       Dio.Response responce = await dio().post('login', data: creds);
       print(responce.data.toString());
@@ -23,14 +24,13 @@ class Auth extends ChangeNotifier {
       print(e);
     }
   }
-
-  void logout(Map creds) {
-    _isLoggedin = false;
-    notifyListeners();
   }
 
+
+
   void register({required Map creds}) {
-    _isRegisted = true;
+    _isRegisted = false;
+
     notifyListeners();
   }
 

@@ -9,8 +9,7 @@ runApp(
   MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => Auth()),
-        //Provider(create: (context) => SomeOtherClass()),
-      ],
+             ],
       child: const MyApp(),
 ),);
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, must_be_immutable
+
 import 'dart:ui';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -5,7 +7,6 @@ import 'package:municipal_cms/screens/Resident_login_page.dart';
 import 'package:municipal_cms/service/auth.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-
 
 class RegistrationPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
@@ -21,84 +22,25 @@ class RegistrationPage extends StatelessWidget {
   bool _showPassword = false;
   final _formKey = GlobalKey<FormState>();
 
-  void _register(BuildContext context) async {
-    final form = _formKey.currentState;
+  RegistrationPage({super.key});
 
+  void _register(BuildContext context) async {
     String password = _passwordController.text;
-    String confirmPassword = _ConfirmPasswordController.text;
+    //String confirmPassword = _ConfirmPasswordController.text;
     String fullName = _fullNameController.text;
     String email = _emailController.text;
     String phoneNumber = _contactController.text;
     String municipality = _municipalityNameController.text;
     String location = _physicalAddressController.text;
-
-    /*try {
-        Dio dio = Dio();
-        dio.options.baseUrl = 'http://127.0.0.1:8000/api/';
-        dio.options.headers['accept'] = 'application/json';
-        dio.options.headers['user_type'] = 'Resident';
-
-        Response response = await dio.post(
-          'register',
-          data: {
-            'FullName': fullName,
-            'email': email,
-            'password': password,
-            'Location': location,
-            'PhoneNumber': phoneNumber,
-            'MunicipalityName': municipality,
-          },
-        );
-
-        // Handle the response
-
-        if (response.data.status == 200) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ResidentLoginPage()),
-          );
-        } else {
-          print(response);
-          // Display an error message to the user
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Registration Failed'),
-              content: Text('An error occurred during registration.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
-      } catch (error) {
-        print(error);
-        // Display an error message to the user
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text('Registration Failed'),
-            content: Text('An error occurred during registration.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }*/
-     var csrfResponse = await http.get(Uri.parse('/sanctum/csrf-cookie'));
-     var csrfToken = csrfResponse.headers['set-cookie']??'';
+    var csrfResponse = await http.get(Uri.parse('/sanctum/csrf-cookie'));
+    var csrfToken = csrfResponse.headers['set-cookie'] ?? '';
 
     var url = Uri.parse('http://127.0.0.1:8000/api/register');
     var headers = <String, String>{
-    'Content-Type': 'application/json',
-    'X-XSRF-TOKEN': csrfToken,
-  };
+      'Content-Type': 'application/json',
+      'X-XSRF-TOKEN': csrfToken,
+      'user_type': 'Resident'
+    };
     var data = {
       'FullName': fullName,
       'email': email,
@@ -112,30 +54,57 @@ class RegistrationPage extends StatelessWidget {
       headers: headers,
       body: jsonEncode(data),
     );
-
-     if (response.statusCode == 200) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ResidentLoginPage()),
-          );
-        } else {
-          print(response);
-          // Display an error message to the user
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Registration Failed'),
-              content: Text('An error occurred during registration.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('OK'),
-                ),
-              ],
+    bool isEmailValid = RegExp(r'^[a-zA-Z0-9]+@[a-zA-Z0-9.]+$').hasMatch(email);
+        
+    if (!isEmailValid) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Invalid Email'),
+          content: const Text('Please enter a valid email address.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
             ),
-          );
-        }
-      
+          ],
+        ),
+      );
+  
+    }else if (response.statusCode == 200) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text('Registration'),
+                content: const Text('Resident registered successfully'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ));
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ResidentLoginPage()),
+      );
+    } else {
+      print(response.body);
+      // Display an error message to the user
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Registration Failed'),
+          content: const Text('An error occurred during registration.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _togglePasswordVisibility() {
@@ -282,7 +251,7 @@ class RegistrationPage extends StatelessWidget {
                                   child: ElevatedButton(
                                     child: const Text('Register'),
                                     onPressed: () {
-                                     /* Map creds = {
+                                      Map creds = {
                                         'email': _emailController.text,
                                         'password': _passwordController.text,
                                         'PhoneNumber': _contactController.text,
@@ -294,6 +263,7 @@ class RegistrationPage extends StatelessWidget {
                                             _ConfirmPasswordController.text,
                                         'DeviceName': 'mobile',
                                       };
+
                                       if (_formKey.currentState != null) {
                                         if (_formKey.currentState!.validate()) {
                                           Provider.of<Auth>(context,
@@ -301,7 +271,7 @@ class RegistrationPage extends StatelessWidget {
                                               .register(creds: creds);
                                           _register(context);
                                         }
-                                      }*/
+                                      }
                                     },
                                   ),
                                 )

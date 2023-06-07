@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->get('/user/revoke', function (Request $reques
     return 'tokens are deleted';
 });
 
-Route::post('register',[\App\Http\Controllers\Api\AuthController::class, 'register']);
+Route::post('register',[AuthController::class, 'register']);
 Route::post('login',[AuthController::class, 'login']);
 
 Route::get('residents',[ResidentsController::class, 'index']);
