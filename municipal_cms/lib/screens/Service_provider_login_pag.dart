@@ -59,12 +59,13 @@ class ServiceProviderLoginPage extends StatelessWidget {
           ],
         ),
       );
-    } else {
+    }
+     if(response.statusCode == 400) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Login Failed'),
-          content: const Text('An error occurred while logging in'),
+          content: const Text('Credentials incorrect, Try again'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -121,9 +122,9 @@ class ServiceProviderLoginPage extends StatelessWidget {
                                 icon: Icon(Icons.email),
                               ),
                               keyboardType: TextInputType.emailAddress,
-                            validator: (input) => input!.contains("@")
+                            validator: (input) => input!.contains("@.")
                                   ? 'Email Id should valid'
-                                  : 'enter your valid email',
+                                  : null,
                             ),
                             const SizedBox(height: 16.0),
                             TextFormField(
@@ -144,10 +145,10 @@ class ServiceProviderLoginPage extends StatelessWidget {
                                       },
                                 ),
                               ),
-                              obscureText: hidePassword,
+                              obscureText: !hidePassword,
                               validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'enter valid password',
+                                    : null,
                             ),
                             const SizedBox(height: 16.0),
                             const SizedBox(height: 16.0),

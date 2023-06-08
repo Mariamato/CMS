@@ -76,19 +76,7 @@ class TaskPage extends StatelessWidget {
                           },
                         ),
                         const SizedBox(height: 16.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                
-                                  print('Save the task');
-                                }
-                              },
-                              child: const Text('Save'),
-                            ),
-                            ElevatedButton(
+                       ElevatedButton(
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
                                 
@@ -97,8 +85,6 @@ class TaskPage extends StatelessWidget {
                               },
                               child: const Text('Submit'),
                             ),
-                          ],
-                        )
                       ],
                     ),
                   ),

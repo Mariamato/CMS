@@ -77,7 +77,7 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
         MaterialPageRoute(builder: (context) => ServiceProviderLoginPage()),
       );
     }
-     else {
+     if(response.statusCode == 422){
       print(response.body);
       // Display an error message to the user
       showDialog(
@@ -146,9 +146,9 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
                                     icon: Icon(Icons.email),
                                   ),
                                   keyboardType: TextInputType.emailAddress,
-                                  validator: (input) => input!.contains("@")
+                                  validator: (input) => input!.contains("@.")
                                   ? 'Email Id should valid'
-                                  : 'please enter your valid email',
+                                  : null,
                                 ),
                                 const SizedBox(height: 16.0),
                                 TextFormField(
@@ -169,10 +169,10 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
                                       },
                                     ),
                                   ),
-                                  obscureText: hidePassword,
+                                  obscureText: !hidePassword,
                                   validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'prease enter your valid password',
+                                    : null,
                                 ),
                                 TextFormField(
                                   controller: _ConfirmPasswordController,
@@ -183,7 +183,7 @@ class ServiceProviderRegistrationPage extends StatelessWidget {
                                   obscureText: hidePassword,
                                   validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'prease enter your valid password',
+                                    : null,
                                 ),
                                 TextFormField(
                                   controller: _municipalityNameController,

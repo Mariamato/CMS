@@ -68,7 +68,8 @@ class MunicipalityRegistrationPage extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (context) => MunicipalityLoginPage()),
       );
-    } else {
+    } 
+    if(response.statusCode == 422) {
       print(response.body);
       // Display an error message to the user
       showDialog(
@@ -136,9 +137,9 @@ class MunicipalityRegistrationPage extends StatelessWidget {
                                     icon: Icon(Icons.email),
                                   ),
                                   keyboardType: TextInputType.emailAddress,
-                                 validator: (input) => input!.contains("@")
-                                  ? 'Email Id should valid'
-                                  : 'please enter your valid email',
+                                 validator: (input) => input!.contains("@.")
+                                  ? 'Email Id should be valid'
+                                  : null,
                                 ),
                                 const SizedBox(height: 16.0),
                                 TextFormField(
@@ -162,7 +163,7 @@ class MunicipalityRegistrationPage extends StatelessWidget {
                                   obscureText: hidePassword,
                                  validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'prease enter your valid password',
+                                    : null,
                                 ),
                                 TextFormField(
                                   controller: _confirmPasswordController,
@@ -170,10 +171,10 @@ class MunicipalityRegistrationPage extends StatelessWidget {
                                     labelText: 'Confirm password',
                                     icon: Icon(Icons.lock),
                                   ),
-                                  obscureText: hidePassword,
+                                  obscureText: !hidePassword,
                                   validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'prease enter your valid password',
+                                    : null,
                                 ),
                                 TextFormField(
                                   controller: _physicalAddressController,

@@ -44,13 +44,13 @@ class MunicipalityLoginPage extends StatelessWidget {
         MaterialPageRoute(builder: (context) =>  MunicipalityPage()),
       );
     } 
-    if (response.statusCode == 401) {
+    if (response.statusCode == 400) {
       print(response.body);
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Login Failed'),
-          content: const Text('Credentials incorrect'),
+          content: const Text('Credentials incorrect,Try again'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -60,21 +60,7 @@ class MunicipalityLoginPage extends StatelessWidget {
         ),
       );
     } 
-    else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Login Failed'),
-          content: const Text('An error occurred while logging in'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
+    
   }
 
  
@@ -125,9 +111,9 @@ class MunicipalityLoginPage extends StatelessWidget {
                                 icon: Icon(Icons.email),
                               ),
                               keyboardType: TextInputType.emailAddress,
-                             validator: (input) => input!.contains("@")
+                             validator: (input) => input!.contains("@.")
                                   ? 'Email Id should valid'
-                                  : 'enter your valid email',
+                                  : null,
                             ),
                             const SizedBox(height: 16.0),
                             TextFormField(
@@ -148,10 +134,10 @@ class MunicipalityLoginPage extends StatelessWidget {
                                       },
                                 ),
                               ),
-                              obscureText: hidePassword,
+                              obscureText: !hidePassword,
                                validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'enter valid password',
+                                    : null,
                             ),
                             const SizedBox(height: 16.0),
                             const SizedBox(height: 16.0),

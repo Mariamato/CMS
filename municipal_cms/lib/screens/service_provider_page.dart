@@ -108,21 +108,7 @@ class ServiceProviderPage extends StatelessWidget {
                                       },
                                     ),
                                     const SizedBox(height: 16.0),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              // Save report to backend server here
-                                              print('Save report');
-                                            }
-                                          },
-                                          child: const Text('Save'),
-                                        ),
-                                        ElevatedButton(
+                                    ElevatedButton(
                                           onPressed: () {
                                             if (_formKey.currentState!
                                                 .validate()) {
@@ -132,8 +118,6 @@ class ServiceProviderPage extends StatelessWidget {
                                           },
                                           child: const Text('Submit'),
                                         ),
-                                      ],
-                                    )
                                   ],
                                 ),
                               ),

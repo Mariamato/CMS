@@ -72,7 +72,8 @@ class RegistrationPage extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (context) => ResidentLoginPage()),
       );
-    } else {
+    } 
+    if(response.statusCode == 422) {
       print(response.body);
       // Display an error message to the user
       showDialog(
@@ -142,16 +143,16 @@ class RegistrationPage extends StatelessWidget {
                                     icon: Icon(Icons.email),
                                   ),
                                   keyboardType: TextInputType.emailAddress,
-                                   validator: (input) => input!.contains("@")
-                                  ? 'Email Id should valid'
-                                  : 'please enter your valid email',
+                                   validator: (input) => input!.contains("@.")
+                                  ? 'Email Id should be valid'
+                                  : null,
                                 ),
                                 const SizedBox(height: 16.0),
                                 TextFormField(
                                   controller: _passwordController,
                                    validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'prease enter your valid password',
+                                    : null,
                                   decoration: InputDecoration(
                                     labelText: 'Password',
                                     icon: const Icon(Icons.lock),

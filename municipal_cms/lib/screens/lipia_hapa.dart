@@ -39,11 +39,11 @@ class LipaHapaPage extends StatelessWidget {
                               children: [
                                 TextFormField(
                                   decoration: const InputDecoration(
-                                    labelText: 'Physical address',
+                                    labelText: 'Phone number',
                                   ),
                                   validator: (value) {
                                     if (value!.isEmpty) {
-                                      return 'Please enter Physical Address required';
+                                      return 'Please enter valid Phone number';
                                     }
                                     return null;
                                   },

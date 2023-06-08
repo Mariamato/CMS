@@ -45,13 +45,13 @@ class ResidentLoginPage extends StatelessWidget {
         MaterialPageRoute(builder: (context) => const ResidentPage()),
       );
     } 
-    if (response.statusCode == 401) {
+    if (response.statusCode == 400) {
       print(response.body);
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Login Failed'),
-          content: const Text('Credentials incorrect'),
+          content: const Text('Credentials incorrect, Try again'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -61,21 +61,6 @@ class ResidentLoginPage extends StatelessWidget {
         ),
       );
     } 
-    else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Login Failed'),
-          content: const Text('An error occurred while logging in'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   void _register(BuildContext context) {
@@ -123,16 +108,16 @@ class ResidentLoginPage extends StatelessWidget {
                                 icon: Icon(Icons.email),
                               ),
                               keyboardType: TextInputType.emailAddress,
-                              validator: (input) => input!.contains("@")
-                                  ? 'Email Id should valid'
-                                  : 'enter your valid email',
+                              validator: (input) => input!.contains("@.")
+                                  ? 'Email Id should be valid'
+                                  : null,
                             ),
                             const SizedBox(height: 16.0),
                             TextFormField(
                                 controller: _passwordController,
                                 validator: (input) => input!.length < 8
                                     ? 'Password should atleast be with 8 characters'
-                                    : 'enter valid password',
+                                    : null,
                                 decoration: InputDecoration(
                                   labelText: 'Password',
                                   icon: const Icon(Icons.lock),
@@ -148,7 +133,7 @@ class ResidentLoginPage extends StatelessWidget {
                                       ),
                                       ),
                                 ),
-                                obscureText: hidePassword),
+                                obscureText: !hidePassword),
                             const SizedBox(height: 16.0),
                             const SizedBox(height: 16.0),
                             TextButton(
