@@ -177,20 +177,20 @@ class AuthController extends Controller
         $userType = $request->header('user_type');
         switch ($userType) {
             case 'Municipality':
-                return $this->UsersLogin($request);
+                return $this->MunicipalityLogin($request);
 
             case 'ServiceProvider':
-                return $this->UsersLogin($request);
+                return $this->ServiceProviderLogin($request);
 
             case 'Resident':
-                return $this->UsersLogin($request);
+                return $this->ResidentLogin($request);
 
             default:
                 return response()->json(['message' => 'Invalid user type'], 400);
         }
     }
 
-    public function UsersLogin(Request $request)
+    public function MunicipalityLogin(Request $request)
     {
         $user = $request->only('email','password');
         $validator = Validator::make(
@@ -209,7 +209,68 @@ class AuthController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             $token = $user->createToken($user->email . '_token')->plainTextToken;
-            $response = ['user'=>$user,'token'=>$token];
+            return response()->json([
+                'status' => 401,
+                'Message' => 'Invalid credentials',
+            ],401);
+        }
+      $token = $user->createToken($user->email . '_token')->plainTextToken;
+        return response()->json([
+            'Status' => 200,
+            'token' => $token,
+            'Message' => 'Loggedin successfully ',
+        ], 200);
+    }
+    public function ServiceProviderLogin(Request $request)
+    {
+        $user = $request->only('email','password');
+        $validator = Validator::make(
+            $request->all(),
+            [
+                "email" => 'required |email| max:191 ',
+                "password" => 'required| min : 8',
+
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json([
+                'Validation error' => $validator->messages(),
+            ], 400);
+        } $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            $token = $user->createToken($user->email . '_token')->plainTextToken;
+            return response()->json([
+                'status' => 401,
+                'Message' => 'Invalid credentials',
+            ],401);
+        }
+      $token = $user->createToken($user->email . '_token')->plainTextToken;
+        return response()->json([
+            'Status' => 200,
+            'token' => $token,
+            'Message' => 'Loggedin successfully ',
+        ], 200);
+    }
+    public function ResidentLogin(Request $request)
+    {
+        $user = $request->only('email','password');
+        $validator = Validator::make(
+            $request->all(),
+            [
+                "email" => 'required |email| max:191 ',
+                "password" => 'required| min : 8',
+
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json([
+                'Validation error' => $validator->messages(),
+            ], 400);
+        } $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            $token = $user->createToken($user->email . '_token')->plainTextToken;
             return response()->json([
                 'status' => 401,
                 'Message' => 'Invalid credentials',

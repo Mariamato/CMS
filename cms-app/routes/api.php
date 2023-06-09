@@ -39,10 +39,6 @@ Route::middleware('auth:sanctum')->get('/user/revoke', function (Request $reques
 
 Route::post('register',[AuthController::class, 'register']);
 Route::post('login',[AuthController::class, 'login']);
-
-Route::get('residents',[ResidentsController::class, 'index']);
-Route::post('residents',[ResidentsController::class, 'store']);
-Route::get('residents/{id}',[ResidentsController::class, 'show']);
-Route::get('residents/{id}/edit',[ResidentsController::class, 'edit']);
-Route::put('residents/{id}/edit',[ResidentsController::class, 'update']);
-Route::put('residents/{id}/delete',[ResidentsController::class, 'destroy']);
+Route::post('submit',[TaskController::class,'Submit']);
+Route::get('ViewTask',[TaskController::class,'ViewTask']);
+Route::get('ViewReport',[ReportController::class,'ViewReport']);

@@ -12,6 +12,15 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $fillable = [
+        "fname",
+        "mname",
+        "sname",
+        "phone",
+        "address",
+        "email",
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -43,4 +52,10 @@ protected $appends = ['avatar'];
 
         return"https://www.gravatar.com/avatar/" . md5( strtolower( trim( $this -> email ) ) );
     }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
 }
+
