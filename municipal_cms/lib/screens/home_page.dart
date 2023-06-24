@@ -2,11 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:municipal_cms/screens/Service_provider_login_pag.dart';
-import 'package:municipal_cms/service/auth.dart';
 import 'package:municipal_cms/screens/lipia_hapa.dart';
 import 'package:municipal_cms/screens/municipality_login_page.dart';
-import 'package:municipal_cms/screens/task.dart';
-import 'package:provider/provider.dart';
+import 'package:municipal_cms/screens/task_page.dart';
 import 'Resident_login_page.dart';
 
 class MyApp extends StatelessWidget {
@@ -88,9 +86,7 @@ class MyHomePage extends StatelessWidget {
               const SizedBox(
                 height: 20.0,
               ),
-              Expanded(child: Consumer<Auth>(builder: (context, auth, child) {
-                if (!auth.authenticated) {
-                  return GridView.count(
+              Expanded(child:  GridView.count(
                     crossAxisCount: 3,
                     children: [
                       _buildMenuItem(
@@ -112,34 +108,8 @@ class MyHomePage extends StatelessWidget {
                         '/Municipality',
                       ),
                     ],
-                  );
-                } else {
-                  return  GridView.count(
-                    crossAxisCount: 3,
-                    children: [
-                      _buildMenuItem(
-                        context,
-                        'Resident',
-                        Icons.person,
-                        '/resident',
-                      ),
-                      _buildMenuItem(
-                        context,
-                        'Service Provider',
-                        Icons.local_car_wash,
-                       '/resident',
-                      ),
-                      _buildMenuItem(
-                        context,
-                        'Municipality',
-                        Icons.location_city_rounded,
-                       '/resident',
-                      ),
-                    ],
-                  );
-                }
-              })),
-            ],
+                  ))
+            ]
           ),
         ),
       ),

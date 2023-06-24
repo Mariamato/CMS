@@ -1,14 +1,18 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
+
+
+final TextEditingController _TaskController = TextEditingController();
+final TextEditingController _LocationController = TextEditingController();
 
 void _ViewSchedule(BuildContext context) {
   // Add view schedule functionality here
 }
 
+void _SubmitReport(BuildContext context) {}
+
 class ServiceProviderPage extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
-
   ServiceProviderPage({super.key});
 
   @override
@@ -33,8 +37,7 @@ class ServiceProviderPage extends StatelessWidget {
                 children: [
                   TextButton(
                       onPressed: (() => _ViewSchedule(context)),
-                      child: const Text(
-                          "Upload Task schedule here...")),
+                      child: const Text("Upload Task schedule here...")),
                   Center(
                     child: SingleChildScrollView(
                       child: SizedBox(
@@ -50,6 +53,7 @@ class ServiceProviderPage extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     TextFormField(
+                                      controller: _TaskController,
                                       decoration: const InputDecoration(
                                         labelText: 'Task performed:',
                                       ),
@@ -61,6 +65,7 @@ class ServiceProviderPage extends StatelessWidget {
                                       },
                                     ),
                                     TextFormField(
+                                      controller: _LocationController,
                                       decoration: const InputDecoration(
                                         labelText: 'Location:',
                                       ),
@@ -84,40 +89,17 @@ class ServiceProviderPage extends StatelessWidget {
                                       },
                                     ),
                                     const SizedBox(height: 16.0),
-                                    TextFormField(
-                                      decoration: const InputDecoration(
-                                        labelText: 'Time:',
-                                      ),
-                                      validator: (value) {
-                                        if (value!.isEmpty) {
-                                          return 'Please enter the time task performed';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    const SizedBox(height: 16.0),
-                                    TextFormField(
-                                      decoration: const InputDecoration(
-                                        labelText: 'Service Provider ID:',
-                                      ),
-                                      validator: (value) {
-                                        if (value!.isEmpty) {
-                                          return 'Please enter the Service Provider ID';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                    const SizedBox(height: 16.0),
+                                  
                                     ElevatedButton(
-                                          onPressed: () {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              // Save report to backend server here
-                                              print('Submitting report');
-                                            }
-                                          },
-                                          child: const Text('Submit'),
-                                        ),
+                                      onPressed: () {
+                                        if (_formKey.currentState!.validate()) {
+                                          // Save report to backend server here
+                                          print('Submitting report');
+                                        }
+                                        _SubmitReport(context);
+                                      },
+                                      child: const Text('Submit'),
+                                    ),
                                   ],
                                 ),
                               ),
